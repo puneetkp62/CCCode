@@ -2,10 +2,10 @@
 -- TechNova Imaging Systems Pvt Ltd
 -- Employee Self Reflection Form — Database Setup
 -- Run this script ONCE in SSMS before first use
--- Database: CORPHEALTH
+-- Database: EmpPointer
 -- ============================================================
 
-USE CORPHEALTH;
+USE EmpPointer;
 GO
 
 -- ------------------------------------------------------------

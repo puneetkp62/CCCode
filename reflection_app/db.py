@@ -9,7 +9,7 @@ from datetime import datetime
 CONN_STR = (
     "DRIVER={ODBC Driver 17 for SQL Server};"
     "SERVER=TNBIMSPROD\\TNBIMSPROD;"
-    "DATABASE=CORPHEALTH;"
+    "DATABASE=EmpPointer;"
     "UID=sofwdb;"
     "PWD=sofwdb;"
     "Encrypt=yes;"
