@@ -31,36 +31,31 @@ def _emp_ctx():
         'role_function': session.get('role_function', ''),
         'team_leader':   session.get('team_leader', ''),
         'division':      session.get('division', ''),
-        'vertical':      session.get('vertical', ''),
         'band':          session.get('band', ''),
     }
 
 
-# ── Step 1: Select Employee ───────────────────────────────────────────────────
+# ── Page 1: Select Employee + Band (combined) ─────────────────────────────────
 @app.route('/')
-def step1():
+def index():
     session.clear()
-    return render_template('step1_employee.html', employees=employees)
+    return render_template('page1_emp_band.html', employees=employees, bands=BANDS)
 
 
-# ── Step 2: Confirm + Select Band ─────────────────────────────────────────────
-@app.route('/step2', methods=['POST'])
-def step2():
+# ── Step 3: General Reflection Questions ─────────────────────────────────────
+@app.route('/step3', methods=['POST'])
+def step3():
     emp_code = request.form.get('emp_code', '').strip()
+    band     = request.form.get('band', '').strip()
+
     if emp_code in employee_dict:
         emp = employee_dict[emp_code]
         for k, v in emp.items():
             session[k] = v
-    return render_template('step2_band.html', bands=BANDS, emp=_emp_ctx())
 
+    if band in BANDS:
+        session['band'] = band
 
-# ── Step 3: General Reflection Questions ─────────────────────────────────────
-@app.route('/step3', methods=['POST', 'GET'])
-def step3():
-    if request.method == 'POST' and 'band' in request.form:
-        band = request.form.get('band', '')
-        if band in BANDS:
-            session['band'] = band
     return render_template('step3_general.html',
                            questions=GENERAL_QUESTIONS,
                            explore_options=EXPLORE_OPTIONS,
@@ -92,7 +87,7 @@ def step4():
                            emp=_emp_ctx())
 
 
-# ── Step 5: Preview ───────────────────────────────────────────────────────────
+# ── Step 5: Preview (combined with complete page) ─────────────────────────────
 @app.route('/step5', methods=['POST'])
 def step5():
     comps = session.get('competencies', [])
@@ -108,7 +103,8 @@ def step5():
         }
     session['competency_answers'] = comp_answers
 
-    return render_template('step5_preview.html',
+    return render_template('page5_preview_complete.html',
+                           submitted=False,
                            emp=_emp_ctx(),
                            general_questions=GENERAL_QUESTIONS,
                            explore_options=EXPLORE_OPTIONS,
@@ -119,10 +115,19 @@ def step5():
 # ── Edit redirect (from preview back to step 3) ───────────────────────────────
 @app.route('/edit')
 def edit():
-    return redirect(url_for('step3'))
+    return redirect(url_for('step3_get'))
 
 
-# ── Submit: save to SQL then show download page ───────────────────────────────
+@app.route('/step3_edit')
+def step3_get():
+    return render_template('step3_general.html',
+                           questions=GENERAL_QUESTIONS,
+                           explore_options=EXPLORE_OPTIONS,
+                           saved=session.get('general_answers', {}),
+                           emp=_emp_ctx())
+
+
+# ── Submit: save to SQL then show complete section ────────────────────────────
 @app.route('/submit', methods=['POST'])
 def submit():
     error = None
@@ -132,7 +137,9 @@ def submit():
         session['submission_id'] = submission_id
     except Exception as e:
         error = str(e)
-    return render_template('step6_complete.html',
+
+    return render_template('page5_preview_complete.html',
+                           submitted=True,
                            emp=_emp_ctx(),
                            submission_id=submission_id,
                            error=error)

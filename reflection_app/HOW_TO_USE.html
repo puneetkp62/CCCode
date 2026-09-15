@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Use — Employee Self-Reflection Form</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Segoe UI, Arial, sans-serif; background: #f4f6f9; color: #222; margin: 0; padding: 24px; }
+    .container { max-width: 860px; margin: 0 auto; }
+    h1 { color: #0b2545; border-bottom: 3px solid #1565c0; padding-bottom: 10px; }
+    h2 { color: #1565c0; margin-top: 36px; }
+    h3 { color: #0b2545; margin-top: 20px; }
+    .card { background: #fff; border-radius: 10px; padding: 20px 28px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .step { display: flex; gap: 16px; align-items: flex-start; margin: 14px 0; }
+    .step-num { background: #1565c0; color: #fff; border-radius: 50%; width: 32px; height: 32px;
+                display: flex; align-items: center; justify-content: center; font-weight: 700;
+                flex-shrink: 0; font-size: .95rem; }
+    .step-body { flex: 1; }
+    code { background: #e8edf4; padding: 2px 7px; border-radius: 4px; font-size: .9rem; }
+    pre { background: #1a2744; color: #cfe2ff; padding: 16px 20px; border-radius: 8px;
+          overflow-x: auto; font-size: .88rem; line-height: 1.6; }
+    .warn { background: #fff8e1; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+    .ok   { background: #e8f5e9; border-left: 4px solid #2e7d32; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #d0d7e3; padding: 9px 14px; font-size: .88rem; }
+    th { background: #e3ecf7; color: #0b2545; }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    .badge { display: inline-block; background: #1565c0; color: #fff; padding: 2px 9px; border-radius: 12px; font-size: .8rem; font-weight: 600; }
+    footer { text-align: center; color: #999; font-size: .8rem; margin-top: 40px; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>📋 Employee Self-Reflection Form — How to Use</h1>
+  <p style="color:#555;">TechNova Imaging Systems Pvt Ltd &nbsp;|&nbsp; HR &amp; Talent Development</p>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>🗂 Project Structure</h2>
+  <div class="card">
+    <pre>reflection_app/
+├── app.py                  ← Flask application (run this)
+├── data_loader.py          ← Reads employee & competency Excel files
+├── db.py                   ← SQL Server save logic
+├── pdf_generator.py        ← PDF creation with ReportLab
+├── create_tables.sql       ← Run ONCE in SSMS before first use
+├── HOW_TO_USE.html         ← This file
+├── requirements.txt        ← Python package list
+├── data/
+│   ├── employee_data.xlsx  ← Employee master list
+│   └── competencies.xlsx   ← Competency framework by role & band
+└── templates/
+    ├── base.html
+    ├── page1_emp_band.html      ← Step 1: Select employee + band
+    ├── step3_general.html       ← Step 2: General reflection questions
+    ├── step4_competency.html    ← Step 3: Competency self-assessment
+    └── page5_preview_complete.html  ← Step 4: Preview & Submit / Download</pre>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>⚙️ One-Time Setup (Before First Use)</h2>
+
+  <h3>Step 1 — Create the Database Tables</h3>
+  <div class="card">
+    <div class="warn">
+      <strong>Run this once</strong> on the SQL Server before launching the application for the first time.
+    </div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">Open <strong>SSMS</strong> (SQL Server Management Studio) and connect to <code>TNBIMSPROD\TNBIMSPROD</code></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">Open the file <code>create_tables.sql</code> from this folder</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">Click <strong>Execute (F5)</strong> — you should see:<br>
+        <code>Table dbo.reflection_submissions created.</code><br>
+        <code>Table dbo.competency_responses created.</code><br>
+        <code>Setup complete. Both tables are ready.</code>
+      </div>
+    </div>
+    <div class="ok">
+      If it says <em>"already exists — skipped"</em>, that is also fine — the tables already exist.
+    </div>
+  </div>
+
+  <h3>Step 2 — Install Python Dependencies</h3>
+  <div class="card">
+    <p>Run the following command in your terminal / command prompt inside the <code>reflection_app</code> folder:</p>
+    <pre>pip install flask pandas openpyxl reportlab pyodbc</pre>
+    <p>Or use the requirements file if provided:</p>
+    <pre>pip install -r requirements.txt</pre>
+    <div class="warn">
+      <strong>ODBC Driver 17 for SQL Server</strong> must also be installed on the machine that will run the app.
+      Download from Microsoft: <em>Microsoft ODBC Driver 17 for SQL Server</em>
+    </div>
+  </div>
+
+  <h3>Step 3 — Place the Data Files</h3>
+  <div class="card">
+    <p>Make sure both Excel files exist in the <code>data/</code> subfolder:</p>
+    <table>
+      <tr><th>File</th><th>Contains</th></tr>
+      <tr><td><code>data/employee_data.xlsx</code></td><td>All employee records — EmpID, Name, Role, Role Function, Team Leader, Division</td></tr>
+      <tr><td><code>data/competencies.xlsx</code></td><td>Competency framework — one sheet per Role Function, columns per Band level</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>🚀 Running the Application</h2>
+  <div class="card">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">Open a terminal / command prompt</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">Navigate to the <code>reflection_app</code> folder:<br>
+        <pre>cd path\to\reflection_app</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">Run the app:<br>
+        <pre>python app.py</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">Open a browser and go to:<br>
+        <code>http://localhost:5000</code><br>
+        <em>Or share <code>http://&lt;your-machine-ip&gt;:5000</code> with employees on the same network.</em>
+      </div>
+    </div>
+    <div class="ok">
+      The app loads all employee and competency data at startup. The first page load may take 2–3 seconds.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>📝 How Employees Use the Form</h2>
+
+  <div class="card">
+    <h3>Page 1 — Select Employee &amp; Band</h3>
+    <p>The employee:</p>
+    <ul>
+      <li>Types their name or Employee ID in the search box to filter the list</li>
+      <li>Clicks their name in the dropdown — their details (Role, Role Function, Team Leader, Division) appear below automatically</li>
+      <li>Selects their Band level (FT / FMT / OMT / BMT / SMT)</li>
+      <li>Clicks <strong>Next → General Questions</strong></li>
+    </ul>
+    <table>
+      <tr><th>Band</th><th>Full Name</th></tr>
+      <tr><td>FT</td><td>Front-line Team</td></tr>
+      <tr><td>FMT</td><td>Front-line Management Team</td></tr>
+      <tr><td>OMT</td><td>Operations Management Team</td></tr>
+      <tr><td>BMT</td><td>Business Management Team</td></tr>
+      <tr><td>SMT</td><td>Senior Management Team</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Page 2 — General Reflection Questions (Part A)</h3>
+    <p>9 open-ended questions about the employee's contributions, learnings, challenges, and career direction. These are the same for all employees.</p>
+    <ul>
+      <li>Questions 1–6, 8, 9 are free-text areas</li>
+      <li>Question 7 is a multi-select checkbox (career direction options)</li>
+    </ul>
+    <p>Click <strong>Next → Competency Assessment</strong> to continue.</p>
+  </div>
+
+  <div class="card">
+    <h3>Page 3 — Competency Self-Assessment (Part B)</h3>
+    <p>Competencies are loaded automatically based on the employee's <strong>Role Function</strong> and selected <strong>Band</strong>.</p>
+    <p>For each competency the employee:</p>
+    <ul>
+      <li>Reads the <em>Expected behaviour at their Band level</em> (shown in blue)</li>
+      <li>Drags the <strong>rating slider</strong> from 0 to 10</li>
+      <li>Writes a <strong>self-reflection</strong> with specific examples</li>
+    </ul>
+    <p>Click <strong>Preview Entries →</strong> when done.</p>
+  </div>
+
+  <div class="card">
+    <h3>Page 4 — Preview &amp; Submit</h3>
+    <p>The employee reviews all their answers — Part A and Part B — before submitting.</p>
+    <ul>
+      <li>Click <strong>✏️ Edit Answers</strong> to go back and make changes</li>
+      <li>Click <strong>✅ Submit &amp; Save</strong> to save to the database</li>
+    </ul>
+    <p>After successful submission:</p>
+    <ul>
+      <li>A confirmation screen shows the <strong>Submission ID</strong></li>
+      <li>Click <strong>📥 Download as PDF</strong> to download the complete reflection form</li>
+      <li>A reminder is shown to send the PDF to the Team Leader before the deadline</li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>🗄 Database Details</h2>
+  <div class="card">
+    <table>
+      <tr><th>Setting</th><th>Value</th></tr>
+      <tr><td>Server</td><td><code>TNBIMSPROD\TNBIMSPROD</code></td></tr>
+      <tr><td>Database</td><td><code>CORPHEALTH</code></td></tr>
+      <tr><td>User</td><td><code>sofwdb</code></td></tr>
+    </table>
+    <p style="margin-top:14px;"><strong>Tables created by <code>create_tables.sql</code>:</strong></p>
+    <table>
+      <tr><th>Table</th><th>Purpose</th></tr>
+      <tr><td><code>dbo.reflection_submissions</code></td><td>One row per submitted form — employee info + 9 general answers</td></tr>
+      <tr><td><code>dbo.competency_responses</code></td><td>One row per competency per submission — rating + reflection text</td></tr>
+    </table>
+    <p style="margin-top:14px;">To view submissions in SSMS:</p>
+    <pre>SELECT submission_id, emp_name, role_function, band, submitted_at
+FROM dbo.reflection_submissions
+ORDER BY submitted_at DESC;</pre>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>🔧 Troubleshooting</h2>
+  <div class="card">
+    <table>
+      <tr><th>Problem</th><th>Likely Cause</th><th>Fix</th></tr>
+      <tr>
+        <td>App won't start — <em>ModuleNotFoundError</em></td>
+        <td>Missing Python package</td>
+        <td>Run <code>pip install flask pandas openpyxl reportlab pyodbc</code></td>
+      </tr>
+      <tr>
+        <td>No employees in dropdown</td>
+        <td><code>employee_data.xlsx</code> not found</td>
+        <td>Check that the file is in the <code>data/</code> folder</td>
+      </tr>
+      <tr>
+        <td>No competencies shown</td>
+        <td>Role Function not mapped in <code>data_loader.py</code></td>
+        <td>Check <code>ROLE_FUNCTION_SHEET_MAP</code> in <code>data_loader.py</code> and ensure the employee's Role Function is listed</td>
+      </tr>
+      <tr>
+        <td>Submit fails — DB error</td>
+        <td>ODBC driver not installed, or network can't reach SQL Server</td>
+        <td>Install <em>ODBC Driver 17 for SQL Server</em>; ensure app server can reach <code>TNBIMSPROD</code></td>
+      </tr>
+      <tr>
+        <td>PDF download is blank / missing data</td>
+        <td>Session expired or employee went directly to download URL</td>
+        <td>Complete the full form flow from Page 1</td>
+      </tr>
+      <tr>
+        <td>Port 5000 already in use</td>
+        <td>Another process using port 5000</td>
+        <td>Change the port in <code>app.py</code>: <code>app.run(port=5001)</code></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>🌐 Deploying for the Whole Office</h2>
+  <div class="card">
+    <p>To let all employees access the form from their own computers:</p>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">Run the app on a machine that is always on (a server or a dedicated PC on the office network)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">Find that machine's IP address: <code>ipconfig</code> on Windows → look for IPv4 Address (e.g. <code>192.168.1.50</code>)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">Share the URL with employees: <code>http://192.168.1.50:5000</code></div>
+    </div>
+    <div class="warn">
+      For production use, consider running behind <strong>IIS</strong> or <strong>Gunicorn + nginx</strong> with a proper domain name.
+      Contact your IT team for assistance.
+    </div>
+  </div>
+
+  <footer>
+    Employee Self-Reflection Form &nbsp;|&nbsp; TechNova Imaging Systems Pvt Ltd &nbsp;|&nbsp; HR &amp; Talent Development
+  </footer>
+
+</div>
+</body>
+</html>

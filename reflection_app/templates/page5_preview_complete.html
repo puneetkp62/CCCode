@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% set current_step = 5 %}
+{% block content %}
+
+{# ══════════════════════════════════════════════════════════════
+   SECTION A — PREVIEW  (shown before submit)
+═══════════════════════════════════════════════════════════════ #}
+{% if not submitted %}
+<div class="form-card" style="max-width:900px;margin:24px auto;">
+  <div class="card-title">👁 Preview Your Entries</div>
+
+  <div class="emp-banner">
+    <div class="row g-2" style="font-size:.88rem;">
+      <div class="col-sm-6">
+        <strong>Name:</strong> {{ emp.emp_name }}<br>
+        <strong>Emp ID:</strong> {{ emp.emp_code }}<br>
+        <strong>Role:</strong> {{ emp.role }}
+      </div>
+      <div class="col-sm-6">
+        <strong>Role Function:</strong> {{ emp.role_function }}<br>
+        <strong>Team Leader:</strong> {{ emp.team_leader }}<br>
+        <strong>Band:</strong> <strong style="color:var(--accent);">{{ emp.band }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Part A -->
+  <div class="preview-section">
+    <h5>Part A — General Reflection Questions</h5>
+    {% for question in general_questions %}
+    {% set i = loop.index0 %}
+    <div class="preview-q">Q{{ loop.index }}. {{ question }}</div>
+    <div class="preview-a">
+      {% set key = 'q' ~ loop.index %}
+      {% if i == 6 %}
+        {% set ans = general_answers.get(key, []) %}
+        {% if ans %}
+          {% for opt in explore_options %}
+            {% if opt in ans %}☑ {{ opt }}<br>{% else %}☐ {{ opt }}<br>{% endif %}
+          {% endfor %}
+        {% else %}<em class="text-muted">Not answered</em>{% endif %}
+      {% else %}
+        {% set ans = general_answers.get(key, '') %}
+        {% if ans %}{{ ans }}{% else %}<em class="text-muted">Not answered</em>{% endif %}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Part B -->
+  <div class="preview-section">
+    <h5>Part B — Competency Reflections
+      <span style="font-weight:400;font-size:.82rem;color:#888;">({{ comp_answers|length }} competencies)</span>
+    </h5>
+    {% for comp in comp_answers %}
+    <div class="preview-comp">
+      <div class="preview-comp-hdr">
+        <div style="font-weight:700;color:var(--navy);font-size:.92rem;">
+          {{ comp.competency }} — {{ comp.attribute }}
+        </div>
+        <span class="rating-badge">{{ comp.rating }} / 10</span>
+      </div>
+      <div class="preview-comp-body">
+        {% if comp.indicator %}
+        <div style="font-size:.82rem;color:#555;font-style:italic;margin-bottom:6px;">
+          <strong style="color:var(--blue);font-style:normal;">Expected at Band {{ emp.band }}:</strong>
+          {{ comp.indicator }}
+        </div>
+        {% endif %}
+        <strong style="font-size:.85rem;">Self Reflection:</strong><br>
+        <span style="font-size:.88rem;white-space:pre-wrap;">
+          {% if comp.reflection %}{{ comp.reflection }}{% else %}<em class="text-muted">—</em>{% endif %}
+        </span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Action row -->
+  <div class="d-flex justify-content-between align-items-center pt-3"
+       style="border-top:2px solid var(--light-blue);margin-top:8px;">
+    <a href="/edit" class="btn-secondary-custom btn">✏️ Edit Answers</a>
+    <form method="POST" action="/submit">
+      <button type="submit" class="btn-primary-custom btn"
+              style="font-size:1rem;padding:12px 40px;">
+        ✅ Submit &amp; Save
+      </button>
+    </form>
+  </div>
+</div>
+
+{# ══════════════════════════════════════════════════════════════
+   SECTION B — COMPLETE  (shown after successful submit)
+═══════════════════════════════════════════════════════════════ #}
+{% else %}
+<div class="form-card text-center" style="max-width:620px;margin:40px auto;">
+
+  {% if error %}
+  <!-- Error -->
+  <div style="font-size:3.5rem;">⚠️</div>
+  <h3 class="fw-bold mt-2" style="color:#c62828;">Submission Error</h3>
+  <p class="text-muted">Your form could not be saved to the database.</p>
+  <div class="alert alert-danger text-start mt-3" style="font-size:.85rem;word-break:break-all;">
+    {{ error }}
+  </div>
+  <a href="javascript:history.back()" class="btn-secondary-custom btn mt-2">
+    ← Back to Preview
+  </a>
+
+  {% else %}
+  <!-- Success -->
+  <div style="font-size:3.8rem;">✅</div>
+  <h3 class="fw-bold mt-2" style="color:#2e7d32;">Form Submitted Successfully!</h3>
+  <p class="text-muted mb-0">Your self-reflection has been saved to the database.</p>
+  {% if submission_id %}
+  <p style="font-size:.82rem;color:#aaa;margin-top:4px;">
+    Submission ID: <strong>#{{ submission_id }}</strong>
+  </p>
+  {% endif %}
+
+  <div class="emp-banner text-start mt-3">
+    <strong>{{ emp.emp_name }}</strong> &nbsp;|&nbsp;
+    {{ emp.role_function }} &nbsp;|&nbsp;
+    Band: <strong>{{ emp.band }}</strong>
+  </div>
+
+  <!-- PDF download -->
+  <a href="/download_pdf"
+     class="btn d-block mt-4"
+     style="background:var(--navy);color:#fff;font-weight:700;
+            padding:14px 0;border-radius:8px;font-size:1rem;
+            text-decoration:none;">
+    📥 Download as PDF
+  </a>
+  <p class="text-muted mt-1" style="font-size:.78rem;">
+    Complete reflection form with all your answers and competency ratings.
+  </p>
+
+  <!-- Send to Team Leader notice -->
+  <div class="send-notice">
+    <h5>📩 Next Step — Share with Your Team Leader</h5>
+    <p style="font-size:.92rem;color:#5d4037;margin:0;">
+      Kindly send the downloaded PDF to your Team Leader<br>
+      <strong>{{ emp.team_leader }}</strong><br>
+      before the submission deadline.
+    </p>
+  </div>
+
+  <a href="/" class="btn-secondary-custom btn d-inline-block mt-4"
+     style="font-size:.88rem;">
+    Submit Another Response
+  </a>
+  {% endif %}
+
+</div>
+{% endif %}
+
+{% endblock %}
