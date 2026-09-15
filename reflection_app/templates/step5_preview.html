@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% set current_step = 5 %}
+{% block content %}
+<div class="form-card" style="max-width:900px;margin:24px auto;">
+  <div class="card-title">👁 Preview Your Entries</div>
+
+  <div class="emp-banner">
+    <div class="row g-2">
+      <div class="col-sm-6">
+        <strong>Name:</strong> {{ emp.emp_name }}<br>
+        <strong>Emp ID:</strong> {{ emp.emp_code }}<br>
+        <strong>Role:</strong> {{ emp.role }}
+      </div>
+      <div class="col-sm-6">
+        <strong>Role Function:</strong> {{ emp.role_function }}<br>
+        <strong>Team Leader:</strong> {{ emp.team_leader }}<br>
+        <strong>Band:</strong> {{ emp.band }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Part A: General -->
+  <div class="preview-section">
+    <h5>Part A — General Reflection Questions</h5>
+    {% for question in general_questions %}
+    {% set i = loop.index0 %}
+    <div class="preview-q">Q{{ loop.index }}. {{ question }}</div>
+    <div class="preview-a">
+      {% set key = 'q' ~ loop.index %}
+      {% if i == 6 %}
+        {% set ans = general_answers.get(key, []) %}
+        {% if ans %}
+          {% for opt in explore_options %}
+            {% if opt in ans %}☑ {{ opt }}<br>{% else %}☐ {{ opt }}<br>{% endif %}
+          {% endfor %}
+        {% else %}
+          <em class="text-muted">Not answered</em>
+        {% endif %}
+      {% else %}
+        {% set ans = general_answers.get(key, '') %}
+        {% if ans %}{{ ans }}{% else %}<em class="text-muted">Not answered</em>{% endif %}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Part B: Competency -->
+  <div class="preview-section">
+    <h5>Part B — Competency Reflections
+      <span style="font-weight:400;font-size:.85rem;color:#888;">
+        ({{ comp_answers|length }} competencies)
+      </span>
+    </h5>
+    {% for comp in comp_answers %}
+    <div class="preview-comp">
+      <div class="preview-comp-hdr">
+        <div style="font-weight:700;color:var(--navy);font-size:.93rem;">
+          {{ comp.competency }} — {{ comp.attribute }}
+        </div>
+        <span class="rating-badge">{{ comp.rating }} / 10</span>
+      </div>
+      <div class="preview-comp-body">
+        {% if comp.indicator %}
+        <div style="font-size:.82rem;color:#555;font-style:italic;margin-bottom:6px;">
+          <strong style="color:var(--blue);font-style:normal;">Expected:</strong>
+          {{ comp.indicator }}
+        </div>
+        {% endif %}
+        <div>
+          <strong style="font-size:.85rem;">Self Reflection:</strong><br>
+          <span style="font-size:.88rem;white-space:pre-wrap;">
+            {% if comp.reflection %}{{ comp.reflection }}{% else %}<em class="text-muted">—</em>{% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Action buttons -->
+  <div class="d-flex justify-content-between align-items-center mt-4 pt-3"
+       style="border-top:1px solid #eee;">
+    <a href="/edit" class="btn-secondary-custom btn">
+      ✏️ Edit Answers
+    </a>
+    <form method="POST" action="/submit">
+      <button type="submit" class="btn-primary-custom btn" style="font-size:1rem;padding:12px 36px;">
+        ✅ Submit &amp; Save
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% set current_step = 4 %}
+{% block content %}
+<div class="form-card" style="max-width:900px;margin:24px auto;">
+  <div class="card-title">🎯 Competency Self-Assessment</div>
+
+  <div class="emp-banner">
+    <strong>{{ emp.emp_name }}</strong> &nbsp;|&nbsp;
+    Role Function: <strong>{{ emp.role_function }}</strong> &nbsp;|&nbsp;
+    Band: <strong>{{ emp.band }}</strong>
+  </div>
+
+  <p class="text-muted" style="font-size:.88rem;margin-bottom:24px;">
+    For each competency, rate yourself from <strong>0 to 10</strong> and share a written reflection
+    on how you demonstrate this competency in your work.
+  </p>
+
+  {% if not competencies %}
+  <div class="alert alert-warning">
+    No competencies found for your Role Function and Band combination.
+    Please go back and verify your selection.
+  </div>
+  {% endif %}
+
+  <form method="POST" action="/step5">
+    {% for comp in competencies %}
+    {% set i = loop.index0 %}
+    {% set key = i | string %}
+    {% set sv = saved.get(key, {}) %}
+    <div class="comp-card">
+      <div class="comp-header">
+        <div>
+          <div class="comp-title">{{ comp.competency }} — {{ comp.attribute }}</div>
+          {% if comp.description %}
+          <div class="desc-text">{{ comp.description }}</div>
+          {% endif %}
+        </div>
+        <div style="font-size:.75rem;color:var(--accent);font-weight:600;white-space:nowrap;margin-left:12px;">
+          #{{ loop.index }}
+        </div>
+      </div>
+      <div class="comp-body">
+        {% if comp.indicator %}
+        <div class="indicator-box">
+          <span style="font-weight:700;color:var(--blue);font-style:normal;">
+            Expected at Band {{ emp.band }}:
+          </span><br>
+          {{ comp.indicator }}
+        </div>
+        {% endif %}
+
+        <!-- Rating slider -->
+        <div class="rating-row">
+          <span class="rating-label">Your Rating:</span>
+          <span style="font-size:.8rem;color:#888;">0</span>
+          <input type="range" min="0" max="10" step="1"
+                 name="rating_{{ i }}"
+                 id="slider_{{ i }}"
+                 value="{{ sv.get('rating', '5') }}"
+                 oninput="document.getElementById('val_{{ i }}').textContent=this.value"
+                 style="flex:1;">
+          <span style="font-size:.8rem;color:#888;">10</span>
+          <div class="rating-value" id="val_{{ i }}">{{ sv.get('rating', '5') }}</div>
+        </div>
+        <div class="rating-ticks">
+          {% for t in range(11) %}<span>{{ t }}</span>{% endfor %}
+        </div>
+
+        <!-- Reflection text -->
+        <label class="form-label fw-semibold" style="font-size:.88rem;color:var(--blue);">
+          Your Self Reflection
+          <span class="text-muted fw-normal">(Describe how you demonstrate this competency with examples)</span>
+        </label>
+        <textarea class="form-control"
+                  name="reflection_{{ i }}"
+                  rows="4"
+                  placeholder="Share specific examples, achievements, and areas where you've applied this competency…"
+        >{{ sv.get('reflection', '') }}</textarea>
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="d-flex justify-content-between mt-4">
+      <a href="/step3" class="btn-secondary-custom btn">&larr; Back</a>
+      <button type="submit" class="btn-primary-custom btn">
+        Preview Entries &rarr;
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

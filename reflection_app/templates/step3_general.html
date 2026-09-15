@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% set current_step = 3 %}
+{% block content %}
+<div class="form-card" style="max-width:800px;margin:24px auto;">
+  <div class="card-title">📝 General Reflection Questions</div>
+
+  <div class="emp-banner">
+    <strong>{{ emp.emp_name }}</strong> &nbsp;|&nbsp; {{ emp.role_function }}
+    &nbsp;|&nbsp; Band: <strong>{{ emp.band }}</strong>
+  </div>
+
+  <p class="text-muted" style="font-size:.88rem;margin-bottom:24px;">
+    Please answer all questions honestly and thoughtfully. Your responses are confidential.
+  </p>
+
+  <form method="POST" action="/step4">
+    {% for question in questions %}
+    {% set i = loop.index0 %}
+    <div class="q-block">
+      <div class="q-label">
+        <span class="q-num">{{ loop.index }}</span>{{ question }}
+      </div>
+
+      {% if i == 6 %}
+      <!-- Checkbox question -->
+      <div class="ps-4">
+        {% for opt in explore_options %}
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox"
+                 name="q7" value="{{ opt }}" id="opt_{{ loop.index }}"
+                 {% if saved.get('q7') and opt in saved.get('q7', []) %}checked{% endif %}>
+          <label class="form-check-label" for="opt_{{ loop.index }}"
+                 style="font-size:.9rem;">{{ opt }}</label>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <textarea class="form-control" name="q{{ loop.index }}"
+                placeholder="Write your answer here…"
+                rows="{% if i in [0,2,3] %}4{% else %}3{% endif %}"
+      >{{ saved.get('q' ~ loop.index, '') }}</textarea>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="d-flex justify-content-between mt-4">
+      <a href="/step2" class="btn-secondary-custom btn">&larr; Back</a>
+      <button type="submit" class="btn-primary-custom btn">
+        Next &rarr; Competency Questions
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
