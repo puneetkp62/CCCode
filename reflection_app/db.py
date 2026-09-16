@@ -4,16 +4,20 @@ try:
 except ImportError:
     PYODBC_AVAILABLE = False
 
+import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 CONN_STR = (
     "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=TNBIMSPROD\\TNBIMSPROD;"
-    "DATABASE=EmpPointer;"
-    "UID=sofwdb;"
-    "PWD=sofwdb;"
-    "Encrypt=yes;"
-    "TrustServerCertificate=yes;"
+    f"SERVER={os.getenv('DB_SERVER', '')};"
+    f"DATABASE={os.getenv('DB_NAME', '')};"
+    f"UID={os.getenv('DB_USER', '')};"
+    f"PWD={os.getenv('DB_PASSWORD', '')};"
+    f"Encrypt={os.getenv('DB_ENCRYPT', 'yes')};"
+    f"TrustServerCertificate={os.getenv('DB_TRUST_CERT', 'yes')};"
 )
 
 

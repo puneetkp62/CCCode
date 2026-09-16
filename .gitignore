@@ -1,1 +1,3 @@
 reflection_app/__pycache__/
+reflection_app/.env
+*.pyc
