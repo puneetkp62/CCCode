@@ -43,18 +43,17 @@ def index():
 
 
 # ── Step 3: General Reflection Questions ─────────────────────────────────────
-@app.route('/step3', methods=['POST'])
+@app.route('/step3', methods=['POST', 'GET'])
 def step3():
-    emp_code = request.form.get('emp_code', '').strip()
-    band     = request.form.get('band', '').strip()
-
-    if emp_code in employee_dict:
-        emp = employee_dict[emp_code]
-        for k, v in emp.items():
-            session[k] = v
-
-    if band in BANDS:
-        session['band'] = band
+    if request.method == 'POST':
+        emp_code = request.form.get('emp_code', '').strip()
+        band     = request.form.get('band', '').strip()
+        if emp_code in employee_dict:
+            emp = employee_dict[emp_code]
+            for k, v in emp.items():
+                session[k] = v
+        if band in BANDS:
+            session['band'] = band
 
     return render_template('step3_general.html',
                            questions=GENERAL_QUESTIONS,
@@ -115,16 +114,7 @@ def step5():
 # ── Edit redirect (from preview back to step 3) ───────────────────────────────
 @app.route('/edit')
 def edit():
-    return redirect(url_for('step3_get'))
-
-
-@app.route('/step3_edit')
-def step3_get():
-    return render_template('step3_general.html',
-                           questions=GENERAL_QUESTIONS,
-                           explore_options=EXPLORE_OPTIONS,
-                           saved=session.get('general_answers', {}),
-                           emp=_emp_ctx())
+    return redirect(url_for('step3'))
 
 
 # ── Submit: save to SQL then show complete section ────────────────────────────

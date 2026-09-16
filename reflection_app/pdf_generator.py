@@ -52,7 +52,7 @@ def generate_pdf(session_data, general_questions, explore_options):
     story.append(Spacer(1, 0.4*cm))
 
     # ── Employee info table ──────────────────────────────────────────────────
-    now = datetime.now().strftime('%d %b %Y')
+    now = datetime.now().strftime('%d %b %Y  %I:%M %p')
     emp_rows = [
         [_b('Employee Code:'), session_data.get('emp_code',''),
          _b('Date:'), now],
