@@ -22,7 +22,7 @@
   </div>
   {% endif %}
 
-  <form method="POST" action="/step5">
+  <form method="POST" action="/step5" id="compForm" novalidate>
     {% for comp in competencies %}
     {% set i = loop.index0 %}
     {% set key = i | string %}
@@ -69,18 +69,21 @@
         <!-- Reflection text -->
         <label class="form-label fw-semibold" style="font-size:.88rem;color:var(--blue);">
           Your Self Reflection
+          <span style="color:#c0392b;font-size:.78rem;">*</span>
           <span class="text-muted fw-normal">(Describe how you demonstrate this competency with examples)</span>
         </label>
         <textarea class="form-control"
                   name="reflection_{{ i }}"
                   rows="4"
+                  required
                   placeholder="Share specific examples, achievements, and areas where you've applied this competency…"
         >{{ sv.get('reflection', '') }}</textarea>
+        <div class="invalid-feedback">Please write your reflection for this competency.</div>
       </div>
     </div>
     {% endfor %}
 
-    <div class="d-flex justify-content-between mt-4">
+    <div class="d-flex justify-content-between mt-4" style="border-top:1px solid var(--border);padding-top:16px;">
       <a href="/step3" class="btn-secondary-custom btn">&larr; Back</a>
       <button type="submit" class="btn-primary-custom btn">
         Preview Entries &rarr;
@@ -88,4 +91,28 @@
     </div>
   </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('compForm').addEventListener('submit', function(e) {
+  let valid = true;
+  this.querySelectorAll('textarea[required]').forEach(ta => {
+    if (!ta.value.trim()) {
+      ta.classList.add('is-invalid');
+      valid = false;
+    } else {
+      ta.classList.remove('is-invalid');
+    }
+  });
+  if (!valid) {
+    e.preventDefault();
+    const first = this.querySelector('.is-invalid');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+document.querySelectorAll('textarea[required]').forEach(ta => {
+  ta.addEventListener('input', () => ta.classList.remove('is-invalid'));
+});
+</script>
 {% endblock %}

@@ -90,7 +90,7 @@ def generate_pdf(session_data, general_questions, explore_options):
             if isinstance(selected, str):
                 selected = [s.strip() for s in selected.split(';') if s.strip()]
             for opt in explore_options:
-                tick = '☑' if opt in selected else '☐'
+                tick = '[X]' if opt in selected else '[ ]'
                 story.append(Paragraph(f"{tick}  {opt}", CBTEXT))
         else:
             ans = general.get(f'q{idx+1}', '') or '—'

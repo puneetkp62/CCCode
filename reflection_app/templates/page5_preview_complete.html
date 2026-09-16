@@ -146,10 +146,18 @@
     </p>
   </div>
 
-  <a href="/" class="btn-secondary-custom btn d-inline-block mt-4"
-     style="font-size:.88rem;">
-    Submit Another Response
-  </a>
+  <div style="margin-top:28px;padding:20px 24px;background:#f9fafc;
+              border:1px solid var(--border);border-radius:8px;text-align:center;">
+    <div style="font-size:1.5rem;margin-bottom:6px;">🙏</div>
+    <p style="font-weight:600;color:var(--navy);margin-bottom:4px;font-size:.95rem;">
+      Thank you, {{ emp.emp_name }}!
+    </p>
+    <p style="color:var(--muted);font-size:.85rem;margin:0;">
+      Your self-reflection has been recorded. We appreciate the time and thought
+      you've put into this exercise. Your inputs will help shape meaningful
+      conversations around your growth and development.
+    </p>
+  </div>
   {% endif %}
 
 </div>
